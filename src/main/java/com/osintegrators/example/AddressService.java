@@ -16,6 +16,11 @@ public interface AddressService {
 
 	void updateAddress(Address address);
 
-  List<Address> findFriends(String name);
+	Address addFriendshipAssociation( Long personId, Long newFriendId );
+	
+	List<Address> findFriends(Long id);
 
+	List<Address> findCandidateFriends( String name );
+
+	List<String> findSuggestions(Long id);
 }

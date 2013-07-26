@@ -53,7 +53,7 @@ public class TestAddressService {
 		assertEquals(expectedPhone, address.getPhone());
 		assertEquals(expectedEmail, address.getEmail());
 		assertEquals(expectedDob, address.getDob());
-		assertEquals(expectedLastPresent, address.getLastPresent());
+		assertEquals(expectedLastPresent, address.getLast_present());
 	}
 
 

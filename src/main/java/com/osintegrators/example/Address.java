@@ -1,11 +1,22 @@
 package com.osintegrators.example;
 
-import java.util.List;
-import javax.persistence.*;
+import java.util.Set;
+
+import javax.persistence.CascadeType;
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.NamedQueries;
+import javax.persistence.NamedQuery;
+import javax.persistence.OneToMany;
+
+import org.codehaus.jackson.annotate.JsonIgnore;
 
 @Entity
-@NamedQueries({
-		@NamedQuery(name = "Address.findAll", query = "select a from Address a"),
+@NamedQueries(value = { @NamedQuery(name = "Address.findAll", query = "select a from Address a"),
+						@NamedQuery(name = "Address.findCandidateFriends", query = "select a from Address as a where a.name <> ?1 and a._id not in ( select b.friend._id from Address2AddressLink as b where b.person.name = ?1 )")})
 public class Address {
 
 	@Id
@@ -17,22 +28,24 @@ public class Address {
 	private String phone;
 	private String email;
 	private String dob;
-	private String lastPresent;
+	private String last_present;
 
-  @OneToMany
-  @JoinTable(name="friend",
-    @JoinColumns(name = "", referencedColumnName = ""))
-  private List<Address> friends;
-  @Transient
-  private List<String> suggestions;
+	@OneToMany( cascade=CascadeType.REMOVE, mappedBy = "person", fetch = FetchType.EAGER)
+	private Set<Address2AddressLink> friends;
 
-	public Address(String name, String address, String phoneNumber, String email, String dob, String lastPresent) {
+	@OneToMany( cascade=CascadeType.REMOVE, mappedBy = "friend", fetch = FetchType.EAGER)
+	private Set<Address2AddressLink> inverseFriends;
+	
+	
+
+	public Address(String name, String address, String phoneNumber,
+			String email, String dob, String lastPresent) {
 		this.name = name;
 		this.address = address;
 		this.phone = phoneNumber;
 		this.email = email;
 		this.dob = dob;
-		this.lastPresent = lastPresent;
+		this.last_present = lastPresent;
 	}
 
 	// ADDED Default Constructor Because of Build Errors in pom.xml
@@ -78,7 +91,7 @@ public class Address {
 	public void setEmail(String email) {
 		this.email = email;
 	}
-  
+
 	public String getDob() {
 		return dob;
 	}
@@ -86,12 +99,24 @@ public class Address {
 	public void setDob(String dob) {
 		this.dob = dob;
 	}
-	
-	public String getLastPresent() {
-		return lastPresent;
+
+	public String getLast_present() {
+		return last_present;
 	}
 
-	public void setLastPresent(String lastPresent) {
-		this.lastPresent = lastPresent;
+	public void setLast_present(String lastPresent) {
+		this.last_present = lastPresent;
+	}
+	
+	@JsonIgnore
+	public Set<Address2AddressLink> getFriends()
+	{
+		return this.friends;
+	}
+	
+	@JsonIgnore
+	public Set<Address2AddressLink> getInverseFriends()
+	{
+		return this.friends;
 	}
 }

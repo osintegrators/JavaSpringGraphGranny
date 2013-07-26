@@ -4,7 +4,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>com.osintegrators</groupId>
 	<artifactId>example</artifactId>
-	<name>GrannyAndFriendsJPA</name>
+	<name>JavaSpringGraphGranny</name>
 	<packaging>war</packaging>
 	<version>1.0.0-BUILD-SNAPSHOT</version>
 
@@ -21,16 +21,25 @@
 	</properties>
 
 	<repositories>
+	
+	
+	
 		<repository>
 			<id>repository.springframework.maven.release</id>
 			<name>Spring Framework Maven Release Repository</name>
 			<url>http://maven.springframework.org/release</url>
 		</repository>
+		
 		<repository>
 			<id>com.springsource.repository.bundles.external</id>
 			<name>SpringSource Enterprise Bundle Repository - External Bundle Releases</name>
 			<url>http://repository.springsource.com/maven/bundles/external</url>
 		</repository>
+		
+		
+		
+		
+		
 	</repositories>
 
 	<dependencies>
@@ -47,11 +56,13 @@
 				</exclusion>
 			</exclusions>
 		</dependency>
+		
 		<dependency>
             <groupId>org.codehaus.jackson</groupId>
             <artifactId>jackson-mapper-asl</artifactId>
             <version>${jackson.version}</version>
         </dependency>
+		
 		<dependency>
 			<groupId>org.springframework</groupId>
 			<artifactId>spring-webmvc</artifactId>
@@ -73,10 +84,11 @@
         </dependency>
 
 		<dependency>
-			<groupId>org.springframework.data</groupId>
-			<artifactId>spring-data-jpa</artifactId>
-			<version>${org.springframework.data-version}</version>
-		</dependency>
+    		<groupId>org.springframework.data</groupId>
+    		<artifactId>spring-data-jpa</artifactId>
+    		<version>1.2.0.RELEASE</version>
+		</dependency>		
+		
 		<dependency>
 			<groupId>org.hibernate</groupId>
 			<artifactId>hibernate-entitymanager</artifactId>
@@ -187,7 +199,7 @@
                 <artifactId>maven-war-plugin</artifactId>
                 <version>2.2</version>
                 <configuration>
-                    <warName>javaspringgranny</warName>
+                    <warName>javaspringgraphgranny</warName>
                 </configuration>
             </plugin>
 			<plugin>

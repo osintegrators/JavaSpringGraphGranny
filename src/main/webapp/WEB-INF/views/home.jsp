@@ -18,7 +18,7 @@ body {
     margin-right:auto;
     margin-top:10px;
     width:800px;
-    height:500px;
+    height:700px;
     background-color:#eee;
     border:1px solid #666;
     box-shadow: .1em .1em .2em #666;
@@ -29,13 +29,13 @@ body {
 
     text-align:center;
 }
-#nameEntry, #addressEntry, #phoneEntry, #emailEntry {
+#nameEntry, #addressEntry, #phoneEntry, #emailEntry, #lastPresentEntry, #dobEntry {
     font-weight:bold;
     position:relative;
     left:50px;
     margin-top:30px;
 }
-#nameField, #addressField, #phoneField, #emailField {
+#nameField, #addressField, #phoneField, #emailField, #lastPresentField, #dobField {
     position:relative;
     left:100px;
     top:-20px;
@@ -65,6 +65,22 @@ body {
     bottom:50px;
     right:50px;
 }
+
+#friendListBox{
+
+}
+
+#friendList{
+	
+}
+
+#suggestedPresentBox {
+  position: absolute;
+  bottom: 120px;
+  right: 50px;
+}
+
+
 </style>
 <head>
     <title>Granny's Addressbook</title>
@@ -92,9 +108,55 @@ body {
         <div id="phoneEntry">
             <div id="phoneLabel" class="label">Phone</div><input id="phoneField" name="phone" type="text" value=""/>
         </div>   
+        
         <div id="emailEntry">
             <div id="emailLabel" class="label">Email</div><input id="emailField" name="email" type="text" value=""/>
         </div>
+        
+		<div id="dobEntry">
+            <div id="dobLabel" class="label">DOB</div><input id="dobField" name="dob" type="text" value=""/>
+        </div>
+        
+        
+        <div id="lastPresentEntry">
+            <div id="lastPresentLabel" class="label">Last Present</div><input id="lastPresentField" name="lastPresent" type="text" value=""/>
+        </div>
+        
+        <!-- a box to select friends -->
+        <p>
+        	<strong>Friends:</strong>
+        </p>
+        <div id="friendListBox">
+        	<select size="4" id="friendsList" name="friendsList">                  
+             </select>
+        </div>
+        <p />
+
+        <!--  a drop down of "candidate" friends (every user in the system who isn't me and who isn't already my friend -->
+        <div id="candidateFriendBox">
+        	<select size="1" id="candidateFriendsList" name="candidateFriendsList">     
+        	</select>
+                
+            <!--  and a button to make an AJAX call to add the new friend association -->
+            <input id="addFriendButton" value="Add to Friends" type="button" onClick="app.addFriend()" />
+            
+        </div>
+        
+        <!-- a box to list suggestions -->
+
+        <div id="suggestedPresentBox">
+        	<p>
+        		<strong>Suggested Presents:</strong>
+        	</p>
+        	
+        	<select size="4" id="suggestedPresentList" name="suggestedPresentList">                  
+            </select>
+        </div>
+        <p />
+
+
+        
+        
         <div id="saveEntry">
             <input id="saveButton" value="Save" type="button" onClick="app.saveAddress()"/>
         </div>  
@@ -142,7 +204,10 @@ var app = {
             contentType:"application/json",
             processData: false,
             data: JSON.stringify(address),
-            success: function() { app.getAllAddresses(); }
+            success: function() { 
+            	
+            	app.populateFields(app.emptyUser);
+            	app.getAllAddresses(); }
         });
         
     },
@@ -154,7 +219,11 @@ var app = {
                   contentType:"application/json",
                   processData: false,
                   data: JSON.stringify(address),
-                  success: function() { app.getAllAddresses(); }
+                  success: function() { 
+                	  app.populateFields(app.emptyUser);
+                	  app.getAllAddresses(); },
+                	  
+                  // error: function( one, two, three ) { alert( three); }
            });
     },
     makeAddress: function(){
@@ -163,7 +232,9 @@ var app = {
         	name: $("#nameField").attr("value"),
             address: $("#addressField").attr("value"),
             phone: $("#phoneField").attr("value"),
-            email: $("#emailField").attr("value")           
+            email: $("#emailField").attr("value"),
+            dob: $("#dobField").attr("value"),
+            last_present: $("#lastPresentField").attr("value")
         };
         return addressObject;
      }, 
@@ -172,7 +243,9 @@ var app = {
             name: "",
             address: "",
             phone: "",
-            email: ""
+            email: "",
+            dob: "",
+            last_present: ""
     },
     getAddressById: function (id){
         if(id){
@@ -188,12 +261,128 @@ var app = {
         }
     },
     
-    populateFields: function(addressJSON){
+    populateCandidateFriends: function( cFriends )
+    {
+		// alert( "about to populate candidate friends" );
+    	var entries = [];
+    	entries.push("<option value='' />");
+		$.each( cFriends, function() {
+			
+                entries.push("<option name='"+ this.name + "' value='"+ this._id+"'>"+ this.name +"</option>");
+		} );         
+        
+		$("#candidateFriendsList").empty();
+        $(entries.join("")).appendTo("#candidateFriendsList");
+    		
+    	
+    },
+
+    populateFriendsList: function( friends )
+    {
+		// alert( "about to populate friends" );
+    	var entries = [];
+    	// entries.push("<option value='' />");
+		$.each( friends, function() {
+			
+                entries.push("<option name='"+ this.name + "' value='"+ this._id+"'>"+ this.name +"</option>");
+		} );         
+        
+		$("#friendsList").empty();
+        $(entries.join("")).appendTo("#friendsList");
+    		
+    	
+    },
+    
+    populateSuggestionsList: function( suggestions )
+    {
+    	// alert( "here" );
+    	var entries = [];
+    	// entries.push("<option value='' />");
+		$.each( suggestions, function() {
+		    // alert( "suggestion: " + this );	
+			entries.push("<option name='"+ this + "' value='"+ this+"'>"+ this +"</option>");
+		} );         
+        
+		$("#suggestedPresentList").empty();
+        $(entries.join("")).appendTo("#suggestedPresentList");
+    },
+    
+    
+    
+    addFriend: function()
+    {
+    	var selectedOption = $("#candidateFriendsList option:selected");
+    	var personId = $("#selectedIndexField").val();
+    	var newFriendId = selectedOption.val();
+    	
+    	// alert( "for user: " + personId + ", new friend is: " + newFriendId );		
+    
+    	$.ajax( { 
+    		
+    		url: "addFriends/" + personId + "/" + newFriendId,
+    		type: "post",
+    		success: function(data) { app.populateFields(data); },
+    		// error: function(jqXHR, textStatus, errorThrown) { alert( "error: " + errorThrown );}
+    	});
+    
+    },
+    
+    populateFields: function(addressJSON) {
+    	
+    	// alert( "here" );
         $("#nameField").attr("value", addressJSON.name);
         $("#addressField").attr("value", addressJSON.address);
         $("#phoneField").attr("value", addressJSON.phone);
         $("#emailField").attr("value", addressJSON.email);
         $("#selectedIndexField").val(addressJSON._id || "");
+        $("#lastPresentField").val( addressJSON.last_present);
+        $("#dobField").val( addressJSON.dob);
+
+        // populate candidate friends list
+        $.ajax({
+                 url:"findCandidateFriends/"+addressJSON.name,
+                 type:"get",
+                 success: function(data) { app.populateCandidateFriends(data); }
+             });
+        
+        // if there are friends, show them in the #friendList
+        $.ajax( {
+        	url: "findFriends/" + addressJSON._id,
+        	type: "get",
+        	success: function(data) { app.populateFriendsList(data); app.populateSuggestions(addressJSON._id); }
+            // error: function( one, two, three ) { alert( three ); }
+        });
+
+    },
+    
+    populateSuggestions: function(id) {
+    	
+    	// empty out any leftover values
+    	$("#suggestedPresentList").empty();
+    	
+        // populate suggested gifts box if criteria are met
+        var dob = $("#dobField").val();
+        var lastPresent = $("#lastPresentField").val();
+        var numFriends = $("#friendsList option").length;
+        
+        if( !dob || !lastPresent || ( numFriends < 1 ) )
+        {
+        	// alert( "NOT getting suggestions!");
+        	return;
+        }
+        else
+        {
+        	// alert( "Asking for suggestions!");
+        	$.ajax( {
+        		
+            	url: "findSuggestions/" + id,
+            	type: "get",
+            	success: function(data) { app.populateSuggestionsList(data); },
+            	error: function(one, two, three) { alert(three);}
+        	});
+        }
+    	
+    	
     },
     
     deleteAddress: function(){
@@ -205,7 +394,11 @@ var app = {
             contentType:"application/json",
             data: JSON.stringify(address),
             success: function() {
-                app.getAllAddresses();
+            	
+            	$("#candidateFriendsList").empty();
+            	$("#friendsList").empty(); 
+            	$("#suggestedPresentList").empty();
+            	app.getAllAddresses();
                 app.populateFields(app.emptyUser);
             }
         });

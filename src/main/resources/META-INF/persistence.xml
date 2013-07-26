@@ -7,6 +7,7 @@
     <persistence-unit name="application" transaction-type="RESOURCE_LOCAL">
         <provider>org.hibernate.ejb.HibernatePersistence</provider>
         <class>com.osintegrators.example.Address</class>
+        <class>com.osintegrators.example.Address2AddressLink</class>
 
         <exclude-unlisted-classes>true</exclude-unlisted-classes>
         <properties>
